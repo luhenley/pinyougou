@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/security
+        http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <!--########## 配置请求URL拦截规则 ##########-->
+    <!-- 配置哪些请求URL不需要拦截 -->
+    <security:http pattern="/login.html" security="none"/>
+    <security:http pattern="/css/**" security="none"/>
+    <security:http pattern="/img/**" security="none"/>
+    <security:http pattern="/js/**" security="none"/>
+    <security:http pattern="/plugins/**" security="none"/>
+
+    <!-- 配置哪些请求URL需要拦截（登录之后才能访问） -->
+    <security:http>
+        <!-- 拦截的URL需要用什么角色访问 ROLE_* ROLE_ADMIN -->
+        <security:intercept-url pattern="/**" access="hasRole('ADMIN')"/>
+        <!--
+            login-page: 登录页面
+            login-processing-url: 登录处理的URL，默认是/login，可以不写
+            username-parameter: 用户名参数名
+            password-parameter：密码参数名
+            authentication-success-forward-url: 登录成功请求转发到哪个URL
+            authentication-failure-forward-url: 登录失败后请求转发到哪个URL
+
+            这两个配合使用，登录成功请求重定向到哪个URL
+            default-target-url="/admin/index.html"
+            always-use-default-target="true"
+
+            authentication-failure-url="/login.html" 登录失败后重定向到哪个URL
+        -->
+        <!-- 配置开启表单登录 -->
+        <security:form-login
+            login-page="/login.html"
+            login-processing-url="/login"
+            username-parameter="username"
+            password-parameter="password"
+            default-target-url="/admin/index.html"
+            always-use-default-target="true"
+            authentication-failure-url="/login.html"/>
+        <!-- 配置跨站请求伪造不可用-->
+        <!-- 关闭跨站点请求伪造 -->
+        <security:csrf disabled="true"/>
+        <!-- 配置头信息，指定框架页策略(iframe子窗口也可以访问) -->
+        <security:headers>
+            <security:frame-options policy="SAMEORIGIN"/>
+        </security:headers>
+        <!-- 配置退出登录
+            invalidate-session 设置session失效
+         -->
+        <security:logout logout-url="/logout" invalidate-session="true"/>
+    </security:http>
+
+    <!-- 配置认证管理器 -->
+    <security:authentication-manager>
+        <!-- 配置认证提供者 -->
+        <security:authentication-provider>
+            <!-- 配置用户认证服务(通过用户名密码方式) -->
+            <security:user-service>
+                <!-- 配置用户认证信息：用户名、密码、角色-->
+                <security:user name="admin" password="123456" authorities="ROLE_ADMIN"/>
+                <security:user name="test" password="123456" authorities="ROLE_ADMIN"/>
+                <security:user name="lhn" password="123456" authorities="ROLE_ADMIN"/>
+                <security:user name="zws" password="123456" authorities="ROLE_ADMIN"/>
+            </security:user-service>
+        </security:authentication-provider>
+    </security:authentication-manager>
+</beans>
